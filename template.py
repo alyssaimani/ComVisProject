@@ -1,4 +1,8 @@
+import os
+
 def get_path_list(root_path):
+    train_path = os.listdir(root_path)
+    return train_path
     '''
         To get a list of path directories from root path
 
@@ -160,7 +164,7 @@ if __name__ == "__main__":
         Modifiable
         -------------------
     '''
-    train_root_path = "[PATH_TO_TRAIN_ROOT_DIRECTORY]"
+    train_root_path = "dataset/train"
     '''
         -------------------
         End of modifiable
@@ -180,7 +184,7 @@ if __name__ == "__main__":
         Modifiable
         -------------------
     '''
-    test_root_path = "[PATH_TO_TEST_ROOT_DIRECTORY]"
+    test_root_path = "dataset/test"
     '''
         -------------------
         End of modifiable
@@ -193,3 +197,5 @@ if __name__ == "__main__":
     predicted_test_image_list = draw_prediction_results(predict_results, test_image_list, test_faces_rects, train_names)
     
     combine_and_show_result(predicted_test_image_list)
+
+    #testing section
