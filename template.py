@@ -88,8 +88,14 @@ def train(train_face_grays, image_classes_list):
     '''
 
 def get_test_images_data(test_root_path):
+    test_image_list = []
     test_path_list = os.listdir(test_root_path)
-    return test_path_list
+
+    for image_path in test_path_list:
+        test_image = test_root_path + '/' + image_path
+        test_image_gray = cv2.cvtColor(cv2.imread(test_image), cv2.COLOR_BGR2GRAY)
+        test_image_list.append(test_image_gray)
+    return test_image_list
     '''
         To load a list of test images from given path list
 
@@ -204,7 +210,7 @@ if __name__ == "__main__":
         -------------------
     '''
 
-    # test_image_list = get_test_images_data(test_root_path)
+    test_image_list = get_test_images_data(test_root_path)
     # test_faces_gray, test_faces_rects, _ = detect_faces_and_filter(test_image_list)
     # predict_results = predict(recognizer, test_faces_gray)
     # predicted_test_image_list = draw_prediction_results(predict_results, test_image_list, test_faces_rects, train_names)
@@ -212,4 +218,7 @@ if __name__ == "__main__":
     # combine_and_show_result(predicted_test_image_list)
 
     #testing section
-    print(image_classes_list)
+    # print(image_classes_list)
+    # print(test_image_list)
+    # cv2.imshow("test", test_image_list[0])
+    # cv2.waitKey(0)
