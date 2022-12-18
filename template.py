@@ -1,9 +1,8 @@
 import os
 
 def get_path_list(root_path):
-    path = []
-    names = os.listdir(root_path)
-    return names
+    train_names = os.listdir(root_path)
+    return train_names
     '''
         To get a list of path directories from root path
 
@@ -20,14 +19,14 @@ def get_path_list(root_path):
     '''
 
 def get_class_id(root_path, train_names):
-    image_class_list = []
-    image_path_list = []
+    image_classes_list = []
+    train_image_list = []
     for i, name in enumerate(train_names):
-        class_path_list = os.listdir(root_path+'/'+name)
+        class_path_list = os.listdir(root_path + '/' + name)
         for image_path in class_path_list:
-            image_class_list.append(i)
-            image_path_list.append(root_path+'/'+name+'/'+image_path)
-    return image_path_list, image_class_list
+            image_classes_list.append(i)
+            train_image_list.append(root_path + '/' + name + '/' + image_path)
+    return train_image_list, image_classes_list
 
     '''
         To get a list of train images and a list of image classes id
@@ -48,6 +47,7 @@ def get_class_id(root_path, train_names):
     '''
 
 def detect_faces_and_filter(image_list, image_classes_list=None):
+    
     '''
         To detect a face from given image list and filter it if the face on
         the given image is less than one
