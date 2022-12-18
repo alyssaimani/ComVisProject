@@ -1,8 +1,11 @@
 import os
 
 def get_path_list(root_path):
-    train_path = os.listdir(root_path)
-    return train_path
+    path = []
+    names = os.listdir(root_path)
+    for name in names:
+        path.append(root_path+'/'+name)
+    return path
     '''
         To get a list of path directories from root path
 
@@ -172,9 +175,9 @@ if __name__ == "__main__":
     '''
 
     train_names = get_path_list(train_root_path)
-    train_image_list, image_classes_list = get_class_id(train_root_path, train_names)
-    train_face_grays, _, filtered_classes_list = detect_faces_and_filter(train_image_list, image_classes_list)
-    recognizer = train(train_face_grays, filtered_classes_list)
+    # train_image_list, image_classes_list = get_class_id(train_root_path, train_names)
+    # train_face_grays, _, filtered_classes_list = detect_faces_and_filter(train_image_list, image_classes_list)
+    # recognizer = train(train_face_grays, filtered_classes_list)
 
     '''
         Please modify train_root_path value according to the location of
@@ -191,11 +194,12 @@ if __name__ == "__main__":
         -------------------
     '''
 
-    test_image_list = get_test_images_data(test_root_path)
-    test_faces_gray, test_faces_rects, _ = detect_faces_and_filter(test_image_list)
-    predict_results = predict(recognizer, test_faces_gray)
-    predicted_test_image_list = draw_prediction_results(predict_results, test_image_list, test_faces_rects, train_names)
+    # test_image_list = get_test_images_data(test_root_path)
+    # test_faces_gray, test_faces_rects, _ = detect_faces_and_filter(test_image_list)
+    # predict_results = predict(recognizer, test_faces_gray)
+    # predicted_test_image_list = draw_prediction_results(predict_results, test_image_list, test_faces_rects, train_names)
     
-    combine_and_show_result(predicted_test_image_list)
+    # combine_and_show_result(predicted_test_image_list)
 
     #testing section
+    print(train_names)
