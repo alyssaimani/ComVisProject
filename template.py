@@ -1,4 +1,5 @@
 import os
+import cv2
 
 def get_path_list(root_path):
     train_names = os.listdir(root_path)
@@ -47,7 +48,7 @@ def get_class_id(root_path, train_names):
     '''
 
 def detect_faces_and_filter(image_list, image_classes_list=None):
-    
+
     '''
         To detect a face from given image list and filter it if the face on
         the given image is less than one
@@ -87,6 +88,8 @@ def train(train_face_grays, image_classes_list):
     '''
 
 def get_test_images_data(test_root_path):
+    test_path_list = os.listdir(test_root_path)
+    return test_path_list
     '''
         To load a list of test images from given path list
 
