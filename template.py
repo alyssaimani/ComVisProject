@@ -3,9 +3,7 @@ import os
 def get_path_list(root_path):
     path = []
     names = os.listdir(root_path)
-    for name in names:
-        path.append(root_path+'/'+name)
-    return path
+    return names
     '''
         To get a list of path directories from root path
 
@@ -22,6 +20,15 @@ def get_path_list(root_path):
     '''
 
 def get_class_id(root_path, train_names):
+    image_class_list = []
+    image_path_list = []
+    for i, name in enumerate(train_names):
+        class_path_list = os.listdir(root_path+'/'+name)
+        for image_path in class_path_list:
+            image_class_list.append(i)
+            image_path_list.append(root_path+'/'+name+'/'+image_path)
+    return image_path_list, image_class_list
+
     '''
         To get a list of train images and a list of image classes id
 
@@ -175,7 +182,7 @@ if __name__ == "__main__":
     '''
 
     train_names = get_path_list(train_root_path)
-    # train_image_list, image_classes_list = get_class_id(train_root_path, train_names)
+    train_image_list, image_classes_list = get_class_id(train_root_path, train_names)
     # train_face_grays, _, filtered_classes_list = detect_faces_and_filter(train_image_list, image_classes_list)
     # recognizer = train(train_face_grays, filtered_classes_list)
 
@@ -202,4 +209,4 @@ if __name__ == "__main__":
     # combine_and_show_result(predicted_test_image_list)
 
     #testing section
-    print(train_names)
+    print(image_classes_list)
