@@ -1,5 +1,6 @@
 import os
 import cv2
+import sys
 
 def get_path_list(root_path):
     train_names = os.listdir(root_path)
@@ -48,6 +49,25 @@ def get_class_id(root_path, train_names):
     '''
 
 def detect_faces_and_filter(image_list, image_classes_list=None):
+    image_filtered_cropped = []
+    location_face_list = []
+    image_clasess_id = []
+
+    fase_cascade = cv2.CascadeClassifier('haarcascade_frontal_face_default.xml')
+
+    for index, image in image_list:
+        img_gray = cv2.cvtColor(cv2.imread(image), cv2.COLOR_BGR2GRAY)
+        detected_face = fase_cascade.detectMultiScale(img_gray, scaleFactor=1.2, minNeighbors=5)
+
+        if(len(detected_face) < 1):
+            continue
+        for face_rect in detected_face:
+            x,y,w,h = face_rect
+            face_img = img_gray[y:y+w, x:x+h]
+            image_filtered_cropped.append(face_img)
+            location_face_list.append(y+w, x+h)
+            image_clasess_id.append(index)
+        return image_filtered_cropped, location_face_list, image_clasess_id
 
     '''
         To detect a face from given image list and filter it if the face on
@@ -128,6 +148,15 @@ def predict(recognizer, test_faces_gray):
     '''
 
 def draw_prediction_results(predict_results, test_image_list, test_faces_rects, train_names):
+    # # Show Result
+    # for idx, (class_id, image) in enumerate(zip(result, image_list)):
+    #     plt.subplot(2, 3, idx+1)
+    #     plt.title(labels[class_id])
+    #     plt.imshow(cv2.cvtColor(cv2.imread(image), cv2.COLOR_BGR2RGB))
+    #     plt.axis('off')
+
+    # plt.show()
+    
     '''
         To draw prediction results on the given test images and acceptance status
 
@@ -192,7 +221,7 @@ if __name__ == "__main__":
 
     train_names = get_path_list(train_root_path)
     train_image_list, image_classes_list = get_class_id(train_root_path, train_names)
-    # train_face_grays, _, filtered_classes_list = detect_faces_and_filter(train_image_list, image_classes_list)
+    train_face_grays, _, filtered_classes_list = detect_faces_and_filter(train_image_list, image_classes_list)
     # recognizer = train(train_face_grays, filtered_classes_list)
 
     '''
@@ -220,5 +249,6 @@ if __name__ == "__main__":
     #testing section
     # print(image_classes_list)
     # print(test_image_list)
+    print(train_face_grays)
     # cv2.imshow("test", test_image_list[0])
     # cv2.waitKey(0)
