@@ -1,5 +1,8 @@
 import os
 import cv2
+import numpy as np
+import math
+import matplotlib.pyplot as plt
 
 def get_path_list(root_path):
     train_names = os.listdir(root_path)
@@ -26,7 +29,9 @@ def get_class_id(root_path, train_names):
         class_path_list = os.listdir(root_path + '/' + name)
         for image_path in class_path_list:
             image_classes_list.append(i)
-            train_image_list.append(root_path + '/' + name + '/' + image_path)
+            train_image_path = root_path + '/' + name + '/' + image_path
+            train_image = cv2.imread(train_image_path)
+            train_image_list.append(train_image)
     return train_image_list, image_classes_list
 
     '''
@@ -48,6 +53,39 @@ def get_class_id(root_path, train_names):
     '''
 
 def detect_faces_and_filter(image_list, image_classes_list=None):
+    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+    face_list = []
+    class_list = []
+    rectangle_list = []
+
+    if(image_classes_list==None):
+        for image in image_list:
+            image_gray = image
+            detected_faces = face_cascade.detectMultiScale(image_gray, scaleFactor=1.2, minNeighbors=6)
+            if(len(detected_faces) < 1):
+                continue
+            for rectangle in detected_faces:
+                x, y, w, h = rectangle
+                face_image = image_gray[y:y+w, x:x+h]
+                face_list.append(face_image)
+                rectangle_list.append(rectangle)
+    
+    else:
+        for image, image_class in zip(image_list, image_classes_list):
+            image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            detected_faces = face_cascade.detectMultiScale(image_gray, scaleFactor=1.2, minNeighbors=6)
+            if(len(detected_faces) < 1):
+                continue
+            for rectangle in detected_faces:
+                x, y, w, h = rectangle
+                face_image = image_gray[y:y+w, x:x+h]
+                face_list.append(face_image)
+                rectangle_list.append(rectangle)
+                class_list.append(image_class)
+        
+    return face_list,rectangle_list,class_list
+
+
 
     '''
         To detect a face from given image list and filter it if the face on
@@ -71,6 +109,10 @@ def detect_faces_and_filter(image_list, image_classes_list=None):
     '''
 
 def train(train_face_grays, image_classes_list):
+    recognizer = cv2.face.LBPHFaceRecognizer_create()
+    recognizer.train(train_face_grays, np.array(image_classes_list))
+
+    return recognizer
     '''
         To create and train face recognizer object
 
@@ -92,9 +134,10 @@ def get_test_images_data(test_root_path):
     test_path_list = os.listdir(test_root_path)
 
     for image_path in test_path_list:
-        test_image = test_root_path + '/' + image_path
-        test_image_gray = cv2.cvtColor(cv2.imread(test_image), cv2.COLOR_BGR2GRAY)
+        test_image_path = test_root_path + '/' + image_path
+        test_image_gray = cv2.cvtColor(cv2.imread(test_image_path), cv2.COLOR_BGR2GRAY)
         test_image_list.append(test_image_gray)
+        
     return test_image_list
     '''
         To load a list of test images from given path list
@@ -111,6 +154,12 @@ def get_test_images_data(test_root_path):
     '''
     
 def predict(recognizer, test_faces_gray):
+    prediction_list = []
+    for image in test_faces_gray:
+        result, loss = recognizer.predict(image)
+        prediction_list.append(result)
+    
+    return prediction_list
     '''
         To predict the test image with the recognizer
 
@@ -128,6 +177,16 @@ def predict(recognizer, test_faces_gray):
     '''
 
 def draw_prediction_results(predict_results, test_image_list, test_faces_rects, train_names):
+    draw_image_list = []
+    for result, ractangle, image in zip(predict_results,test_faces_rects,test_image_list):
+        x, y, w, h = ractangle
+        cv2.rectangle(image, (x,y), (x+w, y+h), (0,255,0), 5)
+        resize_image = cv2.resize(image, (350,350))
+        text = train_names[result]
+        cv2.putText(resize_image, text, (10,30), cv2.FONT_HERSHEY_PLAIN, 2, (0,0,255), 3)
+        draw_image_list.append(resize_image)
+    
+    return draw_image_list
     '''
         To draw prediction results on the given test images and acceptance status
 
@@ -151,6 +210,12 @@ def draw_prediction_results(predict_results, test_image_list, test_faces_rects, 
     
 
 def combine_and_show_result(image_list):
+    plt.figure("Final Result",(12, 4))
+    for idx, image in enumerate(image_list):
+        plt.subplot(1,5, idx+1)
+        plt.imshow(image, cmap="gray")
+        plt.axis('off')
+    plt.show()
     '''
         To show the final image that already combine into one image
 
@@ -192,8 +257,8 @@ if __name__ == "__main__":
 
     train_names = get_path_list(train_root_path)
     train_image_list, image_classes_list = get_class_id(train_root_path, train_names)
-    # train_face_grays, _, filtered_classes_list = detect_faces_and_filter(train_image_list, image_classes_list)
-    # recognizer = train(train_face_grays, filtered_classes_list)
+    train_face_grays, _, filtered_classes_list = detect_faces_and_filter(train_image_list, image_classes_list)
+    recognizer = train(train_face_grays, filtered_classes_list)
 
     '''
         Please modify train_root_path value according to the location of
@@ -211,14 +276,12 @@ if __name__ == "__main__":
     '''
 
     test_image_list = get_test_images_data(test_root_path)
-    # test_faces_gray, test_faces_rects, _ = detect_faces_and_filter(test_image_list)
-    # predict_results = predict(recognizer, test_faces_gray)
-    # predicted_test_image_list = draw_prediction_results(predict_results, test_image_list, test_faces_rects, train_names)
+    test_faces_gray, test_faces_rects, _ = detect_faces_and_filter(test_image_list)
+    predict_results = predict(recognizer, test_faces_gray)
+    predicted_test_image_list = draw_prediction_results(predict_results, test_image_list, test_faces_rects, train_names)
+
+    combine_and_show_result(predicted_test_image_list)
     
-    # combine_and_show_result(predicted_test_image_list)
 
     #testing section
-    # print(image_classes_list)
-    # print(test_image_list)
-    # cv2.imshow("test", test_image_list[0])
-    # cv2.waitKey(0)
+    
