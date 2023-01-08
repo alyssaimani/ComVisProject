@@ -1,8 +1,6 @@
 import os
 import cv2
 import numpy as np
-import math
-import matplotlib.pyplot as plt
 
 def get_path_list(root_path):
     train_names = os.listdir(root_path)
@@ -60,8 +58,8 @@ def detect_faces_and_filter(image_list, image_classes_list=None):
 
     if(image_classes_list==None):
         for image in image_list:
-            image_gray = image
-            detected_faces = face_cascade.detectMultiScale(image_gray, scaleFactor=1.2, minNeighbors=6)
+            image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            detected_faces = face_cascade.detectMultiScale(image_gray, scaleFactor=1.3, minNeighbors=5)
             if(len(detected_faces) < 1):
                 continue
             for rectangle in detected_faces:
@@ -71,9 +69,9 @@ def detect_faces_and_filter(image_list, image_classes_list=None):
                 rectangle_list.append(rectangle)
     
     else:
-        for image, image_class in zip(image_list, image_classes_list):
+        for image, class_id in zip(image_list, image_classes_list):
             image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            detected_faces = face_cascade.detectMultiScale(image_gray, scaleFactor=1.2, minNeighbors=6)
+            detected_faces = face_cascade.detectMultiScale(image_gray, scaleFactor=1.3, minNeighbors=5)
             if(len(detected_faces) < 1):
                 continue
             for rectangle in detected_faces:
@@ -81,8 +79,8 @@ def detect_faces_and_filter(image_list, image_classes_list=None):
                 face_image = image_gray[y:y+w, x:x+h]
                 face_list.append(face_image)
                 rectangle_list.append(rectangle)
-                class_list.append(image_class)
-        
+                class_list.append(class_id)            
+    
     return face_list,rectangle_list,class_list
 
 
@@ -135,7 +133,7 @@ def get_test_images_data(test_root_path):
 
     for image_path in test_path_list:
         test_image_path = test_root_path + '/' + image_path
-        test_image_gray = cv2.cvtColor(cv2.imread(test_image_path), cv2.COLOR_BGR2GRAY)
+        test_image_gray = cv2.imread(test_image_path)
         test_image_list.append(test_image_gray)
         
     return test_image_list
@@ -210,12 +208,9 @@ def draw_prediction_results(predict_results, test_image_list, test_faces_rects, 
     
 
 def combine_and_show_result(image_list):
-    plt.figure("Final Result",(12, 4))
-    for idx, image in enumerate(image_list):
-        plt.subplot(1,5, idx+1)
-        plt.imshow(image, cmap="gray")
-        plt.axis('off')
-    plt.show()
+
+    cv2.imshow("final result", cv2.hconcat(image_list))
+    cv2.waitKey(0)
     '''
         To show the final image that already combine into one image
 
@@ -283,5 +278,3 @@ if __name__ == "__main__":
     combine_and_show_result(predicted_test_image_list)
     
 
-    #testing section
-    
