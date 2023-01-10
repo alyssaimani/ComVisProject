@@ -154,7 +154,7 @@ def get_test_images_data(test_root_path):
 def predict(recognizer, test_faces_gray):
     prediction_list = []
     for image in test_faces_gray:
-        result, loss = recognizer.predict(image)
+        result, _ = recognizer.predict(image)
         prediction_list.append(result)
     
     return prediction_list
